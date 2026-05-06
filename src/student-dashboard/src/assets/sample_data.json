@@ -1,0 +1,261 @@
+{
+  "faculties": [
+    {
+      "faculty_id": 1,
+      "faculty": "Информатика и вычислительная техника",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 2,
+      "faculty": "Нефтегазовое дело",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 3,
+      "faculty": "Экономика и управление",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 4,
+      "faculty": "Машиностроение",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 5,
+      "faculty": "Строительство",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 6,
+      "faculty": "Энергетика",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 7,
+      "faculty": "Геология",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    },
+    {
+      "faculty_id": 8,
+      "faculty": "Химическая технология",
+      "year": 2024,
+      "created_at": "2026-01-31T15:01:58.368962"
+    }
+  ],
+  "users": [
+    {
+      "student_id": 1,
+      "name": "Иванов Иван Иванович",
+      "email": "ivanov.ii@tyuiu.ru",
+      "faculty_id": 1,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 2,
+      "name": "Петров Петр Петрович",
+      "email": "petrov.pp@tyuiu.ru",
+      "faculty_id": 2,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 3,
+      "name": "Сидорова Анна Владимировна",
+      "email": "sidorova.av@tyuiu.ru",
+      "faculty_id": 3,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 4,
+      "name": "Козлов Дмитрий Сергеевич",
+      "email": "kozlov.ds@tyuiu.ru",
+      "faculty_id": 1,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 5,
+      "name": "Смирнова Екатерина Андреевна",
+      "email": "smirnova.ea@tyuiu.ru",
+      "faculty_id": 4,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 6,
+      "name": "Волков Алексей Николаевич",
+      "email": "volkov.an@tyuiu.ru",
+      "faculty_id": 2,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 7,
+      "name": "Новикова Мария Павловна",
+      "email": "novikova.mp@tyuiu.ru",
+      "faculty_id": 5,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 8,
+      "name": "Морозов Сергей Дмитриевич",
+      "email": "morozov.sd@tyuiu.ru",
+      "faculty_id": 6,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 9,
+      "name": "Кузнецова Ольга Викторовна",
+      "email": "kuznetsova.ov@tyuiu.ru",
+      "faculty_id": 3,
+      "created_at": "2026-01-31T15:02:27.129043"
+    },
+    {
+      "student_id": 10,
+      "name": "Попов Андрей Игоревич",
+      "email": "popov.ai@tyuiu.ru",
+      "faculty_id": 7,
+      "created_at": "2026-01-31T15:02:27.129043"
+    }
+  ],
+  "performance": [
+    {
+      "id": 1,
+      "faculty_id": 1,
+      "average_score": 4.25,
+      "students_count": 120,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 2,
+      "faculty_id": 1,
+      "average_score": 4.3,
+      "students_count": 120,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 3,
+      "faculty_id": 2,
+      "average_score": 3.95,
+      "students_count": 95,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 4,
+      "faculty_id": 2,
+      "average_score": 4.05,
+      "students_count": 95,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 5,
+      "faculty_id": 3,
+      "average_score": 4.1,
+      "students_count": 88,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 6,
+      "faculty_id": 3,
+      "average_score": 4.15,
+      "students_count": 88,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 7,
+      "faculty_id": 4,
+      "average_score": 3.85,
+      "students_count": 105,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 8,
+      "faculty_id": 4,
+      "average_score": 3.9,
+      "students_count": 105,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 9,
+      "faculty_id": 5,
+      "average_score": 4.0,
+      "students_count": 92,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 10,
+      "faculty_id": 5,
+      "average_score": 4.05,
+      "students_count": 92,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 11,
+      "faculty_id": 6,
+      "average_score": 3.95,
+      "students_count": 85,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 12,
+      "faculty_id": 6,
+      "average_score": 4.0,
+      "students_count": 85,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 13,
+      "faculty_id": 7,
+      "average_score": 4.15,
+      "students_count": 78,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 14,
+      "faculty_id": 7,
+      "average_score": 4.2,
+      "students_count": 78,
+      "semester": 2,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    },
+    {
+      "id": 15,
+      "faculty_id": 8,
+      "average_score": 4.05,
+      "students_count": 82,
+      "semester": 1,
+      "year": 2024,
+      "created_at": "2026-01-31T15:03:18.728774"
+    }
+  ]
+}
