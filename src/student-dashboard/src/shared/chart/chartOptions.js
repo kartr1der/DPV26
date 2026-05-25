@@ -6,7 +6,7 @@ export const tooltipOptions = {
   cornerRadius: 6,
 }
 
-export function cartesianOptions(mode) {
+export function cartesianOptions(mode, dualAxis = mode === 'score') {
   const scales = {
     x: {
       grid: { display: false },
@@ -29,7 +29,7 @@ export function cartesianOptions(mode) {
     },
   }
 
-  if (mode === 'score') {
+  if (dualAxis) {
     scales.y1 = {
       position: 'right',
       grid: { drawOnChartArea: false },
@@ -72,6 +72,9 @@ export const doughnutOptions = {
       },
     },
     tooltip: tooltipOptions,
+    doughnutSectorLabels: {
+      enabled: true,
+    },
   },
 }
 
@@ -126,4 +129,45 @@ export const scatterOptions = {
       grid: { color: '#edf1f6' },
     },
   },
+}
+
+export function scatterOptionsForMetric(metricName) {
+  const metricLabels = {
+    averageScore: {
+      x: 'Студентов',
+      y: 'Средний балл',
+      yMin: 3.7,
+      yMax: 4.4,
+    },
+    students: {
+      x: 'Средний балл',
+      y: 'Студентов',
+    },
+    trend: {
+      x: 'Студентов',
+      y: 'Динамика, %',
+    },
+  }
+  const labels = metricLabels[metricName] || metricLabels.averageScore
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: scatterOptions.plugins,
+    scales: {
+      x: {
+        title: { display: true, text: labels.x },
+        grid: { color: '#edf1f6' },
+      },
+      y: {
+        min: labels.yMin,
+        max: labels.yMax,
+        title: { display: true, text: labels.y },
+        ticks: {
+          callback: (value) => Number(value).toFixed(metricName === 'averageScore' ? 1 : 0),
+        },
+        grid: { color: '#edf1f6' },
+      },
+    },
+  }
 }

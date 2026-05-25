@@ -19,15 +19,20 @@
         </button>
       </div>
 
-      <label class="field">
+      <div class="field">
         <span>Факультет</span>
-        <select :value="filters.faculty" @change="updateFilter('faculty', $event.target.value)">
-          <option value="all">Все факультеты</option>
-          <option v-for="faculty in options.faculties" :key="faculty.id" :value="faculty.id">
-            {{ faculty.shortName }} · {{ faculty.name }}
-          </option>
-        </select>
-      </label>
+        <div class="faculty-checklist">
+          <label v-for="faculty in options.faculties" :key="faculty.id" class="faculty-check">
+            <input
+              type="checkbox"
+              :checked="filters.facultyIds.includes(faculty.id)"
+              @change="toggleFaculty(faculty.id)"
+            />
+            <span>{{ faculty.shortName }}</span>
+            <strong class="line-clamp-2">{{ faculty.name }}</strong>
+          </label>
+        </div>
+      </div>
 
       <label class="field">
         <span>Поиск по названию</span>
@@ -195,19 +200,21 @@ export default {
     updateNumberFilter(key, value) {
       this.$emit('update-filter', key, Number(value))
     },
+    toggleFaculty(facultyId) {
+      const selectedIds = this.filters.facultyIds.includes(facultyId)
+        ? this.filters.facultyIds.filter((id) => id !== facultyId)
+        : [...this.filters.facultyIds, facultyId]
+
+      this.$emit('update-filter', 'facultyIds', selectedIds)
+    },
   },
 }
 </script>
 
 <style scoped>
 .filter-sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  padding: 18px;
+  padding: 0;
   background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
 }
 
 .brand-block {
@@ -296,6 +303,43 @@ h2 {
   color: var(--color-text);
   background: #fff;
   font-size: 13px;
+}
+
+.faculty-checklist {
+  display: grid;
+  gap: 7px;
+  max-height: 190px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.faculty-check {
+  display: grid;
+  grid-template-columns: 18px 38px 1fr;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  border: 1px solid #d7e3f1;
+  border-radius: var(--radius-md);
+  padding: 7px;
+  background: #fff;
+}
+
+.faculty-check span {
+  display: grid;
+  place-items: center;
+  min-height: 25px;
+  border-radius: 6px;
+  background: #edf4ff;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.faculty-check strong {
+  color: var(--color-text);
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .range-grid {

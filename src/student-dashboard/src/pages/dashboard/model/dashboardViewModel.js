@@ -16,6 +16,7 @@ export function createDefaultDashboardFilters(dataset) {
 
   return {
     faculty: 'all',
+    facultyIds: [],
     query: '',
     year: 'all',
     semester: 'all',
@@ -138,8 +139,13 @@ function filterRows(rows, filters) {
   const query = normalizedFilters.query.trim().toLowerCase()
 
   return rows.filter((row) => {
-    const matchesFaculty =
-      normalizedFilters.faculty === 'all' || row.facultyId === Number(normalizedFilters.faculty)
+    const hasFacultyIds = Array.isArray(normalizedFilters.facultyIds) && normalizedFilters.facultyIds.length > 0
+    const matchesFacultyIds =
+      !hasFacultyIds || normalizedFilters.facultyIds.map(Number).includes(row.facultyId)
+    const matchesLegacyFaculty =
+      normalizedFilters.faculty === undefined ||
+      normalizedFilters.faculty === 'all' ||
+      row.facultyId === Number(normalizedFilters.faculty)
     const matchesYear =
       normalizedFilters.year === 'all' || row.year === Number(normalizedFilters.year)
     const matchesSemester =
@@ -160,7 +166,8 @@ function filterRows(rows, filters) {
       (normalizedFilters.trend === 'stable' && Math.abs(row.trend) <= 0.05)
 
     return (
-      matchesFaculty &&
+      matchesFacultyIds &&
+      matchesLegacyFaculty &&
       matchesYear &&
       matchesSemester &&
       matchesScore &&

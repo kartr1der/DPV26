@@ -80,4 +80,22 @@ describe('buildDashboardViewModel', () => {
     assert.equal(viewModel.detailRows[0].facultyName, 'Информатика и вычислительная техника')
     assert.equal(viewModel.detailRows[0].semester, 2)
   })
+
+  it('treats empty facultyIds as all faculties and filters by multiple faculty ids', () => {
+    const allFilters = {
+      ...createDefaultDashboardFilters(dataset),
+      facultyIds: [],
+    }
+    const selectedFilters = {
+      ...createDefaultDashboardFilters(dataset),
+      facultyIds: [1],
+    }
+
+    const allViewModel = buildDashboardViewModel(dataset, allFilters)
+    const selectedViewModel = buildDashboardViewModel(dataset, selectedFilters)
+
+    assert.equal(allViewModel.detailRows.length, 3)
+    assert.equal(selectedViewModel.detailRows.length, 2)
+    assert.ok(selectedViewModel.detailRows.every((row) => row.facultyId === 1))
+  })
 })
