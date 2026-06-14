@@ -25,6 +25,12 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
+### Installing two libraries responsible for page navigation and data storage
+
+```sh
+npm install vue-router pinia
+```
+
 ### Compile and Hot-Reload for Development
 
 ```sh
