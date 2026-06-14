@@ -1,12 +1,5 @@
 <template>
   <aside class="filter-sidebar" aria-label="Панель фильтров">
-    <div class="brand-block">
-      <div class="brand-mark">ТИУ</div>
-      <div>
-        <p class="brand-caption">Student Analytics</p>
-        <h1>Дашборд успеваемости</h1>
-      </div>
-    </div>
 
     <section class="panel filter-card">
       <div class="section-heading">
