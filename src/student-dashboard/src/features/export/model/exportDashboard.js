@@ -1,7 +1,8 @@
 import { jsPDF } from 'jspdf'
-import * as XLSX from 'xlsx'
+import html2canvas from 'html2canvas'
 
 export function exportDashboardToExcel(detailRows) {
+  const XLSX = require('xlsx')
   const worksheet = XLSX.utils.aoa_to_sheet([
     ['Факультет', 'Сокращение', 'Семестр', 'Средний балл', 'Студентов', 'Динамика (%)', 'Оценка'],
     ...detailRows.map((row) => [
@@ -33,25 +34,34 @@ export function exportDashboardToExcel(detailRows) {
 export async function exportDashboardToPdf(canvasElement) {
   if (!canvasElement) return
 
-  const doc = new jsPDF({
-    orientation: 'landscape',
-    unit: 'mm',
-    format: 'a4',
-  })
-
-  await doc.html(canvasElement, {
-    x: 8,
-    y: 8,
-    width: 281,
-    windowWidth: canvasElement.scrollWidth,
-    html2canvas: {
-      scale: 0.32,
-      backgroundColor: '#f8fbff',
+  try {
+    // Создаём canvas со всем содержимым дашборда (высокое разрешение)
+    const canvas = await html2canvas(canvasElement, {
+      scale: 3,               // чёткая графика и текст
+      backgroundColor: '#ffffff',
       useCORS: true,
-    },
-  })
+      logging: false,
+      letterRendering: true,
+    })
 
-  doc.save(`dashboard_faculties_${todayStamp()}.pdf`)
+    const imgData = canvas.toDataURL('image/png')
+    // A4 портретная ориентация: ширина 210 мм
+    const imgWidth = 210
+    const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    })
+
+    // Добавляем изображение на страницу
+    doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+    doc.save(`dashboard_faculties_${todayStamp()}.pdf`)
+  } catch (error) {
+    console.error('Ошибка экспорта PDF:', error)
+    alert('Не удалось экспортировать PDF. Попробуйте снова или обновите страницу.')
+  }
 }
 
 function todayStamp() {
