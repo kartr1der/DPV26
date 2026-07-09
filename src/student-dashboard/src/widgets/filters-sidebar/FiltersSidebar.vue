@@ -13,7 +13,7 @@
       </div>
 
       <div class="field">
-        <span>Факультет</span>
+        <span>Институт</span>
         <div class="faculty-checklist">
           <label v-for="faculty in options.faculties" :key="faculty.id" class="faculty-check">
             <input
@@ -132,7 +132,7 @@
           <option value="scoreAsc">Балл по возрастанию</option>
           <option value="studentsDesc">Студенты по убыванию</option>
           <option value="trendDesc">Динамика по убыванию</option>
-          <option value="facultyAsc">Факультет A-Я</option>
+          <option value="facultyAsc">Институт A-Я</option>
         </select>
       </label>
 

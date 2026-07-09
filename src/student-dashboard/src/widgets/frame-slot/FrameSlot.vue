@@ -33,17 +33,17 @@
 
       <div v-else-if="frame.viewModel.kind === 'kpi'" class="mini-kpi-grid">
         <div v-for="kpi in frame.viewModel.kpis" :key="kpi.title" class="mini-kpi">
-          <span>{{ kpi.title }}</span>
-          <strong>{{ kpi.value }}</strong>
+          <span class="line-clamp-2">{{ kpi.title }}</span>
+          <strong class="line-clamp-2">{{ kpi.value }}</strong>
           <small :class="kpi.deltaTone">{{ kpi.delta }}</small>
         </div>
       </div>
 
       <div v-else-if="frame.viewModel.kind === 'heatmap'" class="mini-heatmap">
         <div class="mini-heatmap-row head" :style="heatmapGridStyle">
-          <span>Факультет</span>
+          <span>Институт</span>
           <span v-for="semester in frame.viewModel.semesters" :key="semester"
-            >Сем. {{ semester }}</span
+            >{{ formatColumnLabel(semester) }}</span
           >
         </div>
         <div
@@ -68,7 +68,7 @@
         <table>
           <thead>
             <tr>
-              <th>Факультет</th>
+              <th>Институт</th>
               <th>Семестр</th>
               <th>Балл</th>
               <th>Студентов</th>
@@ -83,6 +83,25 @@
               <td>{{ row.semester }}</td>
               <td>{{ row.averageScore.toFixed(2) }}</td>
               <td>{{ row.studentsCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-else-if="frame.viewModel.kind === 'generic-table'" class="mini-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Объект</th>
+              <th>Период</th>
+              <th>Значение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in frame.viewModel.rows.slice(0, 8)" :key="`${row.entity}-${row.period}`">
+              <td>{{ row.entity }}</td>
+              <td>{{ row.period }}</td>
+              <td>{{ row.value }}{{ row.unit ? ` ${row.unit}` : '' }}</td>
             </tr>
           </tbody>
         </table>
@@ -107,7 +126,7 @@
         <ScatterChart
           v-if="frame.viewModel.chartType === 'scatter'"
           :data="frame.viewModel.chartData"
-          :options="scatterOptionsForMetric(frame.viewModel.metricName)"
+          :options="scatterOptionsForMetric(frame.viewModel.metricName, frame.viewModel.metricLabel)"
         />
         <RadarChart
           v-if="frame.viewModel.chartType === 'radar'"
@@ -236,6 +255,9 @@ export default {
   methods: {
     cartesianOptions,
     scatterOptionsForMetric,
+    formatColumnLabel(value) {
+      return typeof value === 'number' ? `Сем. ${value}` : value
+    },
     patchFrame(key, value) {
       this.$emit('select', this.frame.id)
       this.$emit('patch-frame', {
@@ -399,15 +421,23 @@ export default {
 
 .mini-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-content: center;
+  align-items: stretch;
   gap: 10px;
+  height: 100%;
+  min-height: 84px;
 }
 
 .mini-kpi {
   min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 14px;
   background: #f6f9fd;
+  overflow-wrap: anywhere;
 }
 
 .mini-kpi span,
@@ -418,9 +448,10 @@ export default {
 }
 
 .mini-kpi strong {
-  display: block;
   margin: 5px 0;
   font-size: 24px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .mini-heatmap {
@@ -493,10 +524,6 @@ th {
   .span-8,
   .span-12 {
     grid-column: span 12;
-  }
-
-  .mini-kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

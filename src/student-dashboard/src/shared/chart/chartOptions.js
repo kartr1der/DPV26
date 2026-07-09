@@ -131,7 +131,25 @@ export const scatterOptions = {
   },
 }
 
-export function scatterOptionsForMetric(metricName) {
+export function scatterOptionsForMetric(metricName, customLabel) {
+  if (typeof metricName === 'string' && metricName.startsWith('generic:')) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: scatterOptions.plugins,
+      scales: {
+        x: {
+          title: { display: true, text: 'Объект (порядковый номер)' },
+          grid: { color: '#edf1f6' },
+        },
+        y: {
+          title: { display: true, text: customLabel || 'Значение' },
+          grid: { color: '#edf1f6' },
+        },
+      },
+    }
+  }
+
   const metricLabels = {
     averageScore: {
       x: 'Студентов',

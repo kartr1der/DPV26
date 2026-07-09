@@ -3,7 +3,7 @@
     <div class="details-header">
       <div>
         <span class="eyebrow">Детальные данные</span>
-        <h2>Динамика по факультетам</h2>
+        <h2>Динамика по институтам</h2>
       </div>
       <div class="table-summary">
         <span>{{ rows.length }} строк</span>
@@ -15,7 +15,7 @@
       <table>
         <thead>
           <tr>
-            <th>Факультет</th>
+            <th>Институт</th>
             <th>Семестр</th>
             <th>Средний балл</th>
             <th>Студентов</th>

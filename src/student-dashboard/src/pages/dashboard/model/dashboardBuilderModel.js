@@ -1,5 +1,14 @@
 import { cloneDashboardFilters, buildDashboardViewModel } from './dashboardViewModel.js'
 import { dashboardTemplates } from './dashboardTemplates.js'
+import {
+  buildGenericChartData,
+  buildGenericHeatmap,
+  buildGenericKpi,
+  buildGenericMetricOptions,
+  buildGenericTableRows,
+  getGenericMetricMeta,
+  isGenericMetric,
+} from './genericMetricsModel.js'
 
 const chartPalette = ['#1f7aec', '#31b7bc', '#6f62d2', '#f2b447', '#ef6f6c', '#2a9d68', '#52667a', '#9b6aef']
 
@@ -22,8 +31,15 @@ export const metricOptions = [
   { value: 'trend', label: 'Динамика' },
 ]
 
+// Динамический список показателей: встроенные + всё, что обнаружено в загруженном
+// пользователем универсальном (tidy-data) датасете. Используется в живом приложении;
+// статический metricOptions выше сохранён для обратной совместимости и тестов.
+export function buildMetricOptions(genericRecords = []) {
+  return [...metricOptions, ...buildGenericMetricOptions(genericRecords)]
+}
+
 export const groupByOptions = [
-  { value: 'faculty', label: 'По факультетам' },
+  { value: 'faculty', label: 'По институтам' },
   { value: 'semester', label: 'По семестрам' },
 ]
 
@@ -53,11 +69,11 @@ export function createBuilderConfigForTemplate(templateId, previousConfig) {
   }
 }
 
-export function buildDashboardBuilderViewModel(dataset, filters, builderConfig) {
+export function buildDashboardBuilderViewModel(dataset, filters, builderConfig, genericRecords = [], genericFilters = {}) {
   const template = getTemplate(builderConfig.templateId)
   const frames = builderConfig.frames.map((frame) => ({
     ...frame,
-    viewModel: buildFrameViewModel(dataset, filters, frame),
+    viewModel: buildFrameViewModel(dataset, filters, frame, genericRecords, genericFilters),
   }))
   const activeFrame = frames.find((frame) => frame.id === builderConfig.activeFrameId) || frames[0]
 
@@ -67,20 +83,24 @@ export function buildDashboardBuilderViewModel(dataset, filters, builderConfig) 
     activeFrame,
     inspectorOptions: {
       widgetTypes,
-      metricOptions,
+      metricOptions: buildMetricOptions(genericRecords),
       groupByOptions,
       faculties: buildDashboardViewModel(dataset, filters).filterOptions.faculties,
     },
   }
 }
 
-export function buildFrameViewModel(dataset, filters, frameConfig) {
+export function buildFrameViewModel(dataset, filters, frameConfig, genericRecords = [], genericFilters = {}) {
   if (frameConfig.widgetType === 'empty') {
     return {
       kind: 'empty',
       title: frameConfig.title,
       message: 'Выберите диаграмму и данные для визуализации',
     }
+  }
+
+  if (isGenericMetric(frameConfig.metric)) {
+    return buildGenericFrameViewModel(genericRecords, frameConfig, genericFilters)
   }
 
   const frameFilters = buildFrameFilters(filters, frameConfig)
@@ -121,6 +141,47 @@ export function buildFrameViewModel(dataset, filters, frameConfig) {
     axisMode: getAxisMode(frameConfig),
     dualAxis: frameConfig.widgetType === 'bar' && frameConfig.metric === 'summary',
     metricName: normalizeMetric(frameConfig),
+  }
+}
+
+function buildGenericFrameViewModel(genericRecords, frameConfig, genericFilters = {}) {
+  if (frameConfig.widgetType === 'kpi') {
+    return {
+      kind: 'kpi',
+      title: frameConfig.title,
+      kpis: [buildGenericKpi(genericRecords, frameConfig, genericFilters)],
+    }
+  }
+
+  if (frameConfig.widgetType === 'heatmap') {
+    const heatmap = buildGenericHeatmap(genericRecords, frameConfig, genericFilters)
+    return {
+      kind: 'heatmap',
+      title: frameConfig.title,
+      rows: heatmap.rows,
+      semesters: heatmap.semesters,
+    }
+  }
+
+  if (frameConfig.widgetType === 'table') {
+    return {
+      kind: 'generic-table',
+      title: frameConfig.title,
+      rows: buildGenericTableRows(genericRecords, frameConfig, genericFilters),
+    }
+  }
+
+  const meta = getGenericMetricMeta(genericRecords, frameConfig.metric)
+
+  return {
+    kind: 'chart',
+    title: frameConfig.title,
+    chartType: frameConfig.widgetType,
+    chartData: buildGenericChartData(genericRecords, frameConfig, genericFilters),
+    axisMode: 'count',
+    dualAxis: false,
+    metricName: frameConfig.metric,
+    metricLabel: meta.label,
   }
 }
 

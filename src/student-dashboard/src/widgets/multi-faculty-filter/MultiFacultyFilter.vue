@@ -1,7 +1,7 @@
 <template>
   <section class="faculty-filter">
     <div class="filter-title">
-      <span>Факультеты для сравнения</span>
+      <span>Институты для сравнения</span>
       <button type="button" @click="$emit('change', [])">Все</button>
     </div>
 

@@ -12,15 +12,18 @@
     />
   </div>
 </template><script>
-import * as XLSX from 'xlsx'
 import { useCustomDataStore } from '@/stores/customData'
+import { useGenericMetricsStore } from '@/stores/genericMetrics'
+import { isTidyHeaderRow } from '@/entities/metric/model.js'
+import { parseSemicolonCsv } from '@/shared/csv/parseCsv.js'
 
 export default {
   name: 'DataUploader',
   emits: ['uploaded'],
   setup() {
     const customStore = useCustomDataStore()
-    return { customStore }
+    const genericStore = useGenericMetricsStore()
+    return { customStore, genericStore }
   },
   methods: {
     triggerFileInput() {
@@ -34,31 +37,65 @@ export default {
         if (file.name.endsWith('.json')) {
           const text = await file.text()
           data = JSON.parse(text)
+
+          if (Array.isArray(data)) {
+            if (!data.length || !isTidyHeaderRow(Object.keys(data[0]))) {
+              alert(
+                'JSON-массив должен содержать объекты с полями category, metric, entity, period, value (универсальный формат показателей)',
+              )
+              return
+            }
+            this.genericStore.setRecords(data)
+            const categories = [...new Set(data.map((row) => String(row.category || '').trim()))]
+            alert(`Загружено показателей: ${data.length}. Они уже доступны в конструкторе дашборда.`)
+            this.$emit('uploaded', { categories })
+            return
+          }
+
           if (data.faculties && data.performance && data.users) {
             this.customStore.setCustomData({
               faculties: data.faculties,
               performance: data.performance,
               users: data.users,
             })
-            alert('Датасет загружен!')
+            alert('Датасет успеваемости загружен!')
             this.$emit('uploaded')
-            return
-          } else {
-            alert('JSON должен содержать поля faculties, performance, users')
             return
           }
+
+          alert(
+            'Неизвестный формат JSON. Ожидается либо { faculties, performance, users }, либо массив записей показателей (category, metric, entity, period, value).',
+          )
+          return
         } else if (file.name.endsWith('.csv')) {
           const text = await file.text()
-          const parsed = this.parseMultiSectionCSV(text)
-          if (parsed.faculties && parsed.performance && parsed.users) {
-            this.customStore.setCustomData(parsed)
-            alert('Датасет загружен!')
-            this.$emit('uploaded')
-            return
-          } else {
+          const trimmed = text.trim()
+
+          if (trimmed.startsWith('#')) {
+            const parsed = this.parseMultiSectionCSV(text)
+            if (parsed.faculties && parsed.performance && parsed.users) {
+              this.customStore.setCustomData(parsed)
+              alert('Датасет успеваемости загружен!')
+              this.$emit('uploaded')
+              return
+            }
             alert('Неверный формат CSV. Ожидаются секции #faculties, #performance, #users')
             return
           }
+
+          const rows = parseSemicolonCsv(text)
+          if (rows.length && isTidyHeaderRow(Object.keys(rows[0]))) {
+            this.genericStore.setRecords(rows)
+            const categories = [...new Set(rows.map((row) => String(row.category || '').trim()))]
+            alert(`Загружено показателей: ${rows.length}. Они уже доступны в конструкторе дашборда.`)
+            this.$emit('uploaded', { categories })
+            return
+          }
+
+          alert(
+            'Неизвестный формат CSV. Используйте либо секции #faculties/#performance/#users, либо универсальный формат с колонками: category;metric;entity;period;value (опционально: category_label;metric_label;unit)',
+          )
+          return
         } else {
           alert('Поддерживаются только CSV и JSON файлы')
           return

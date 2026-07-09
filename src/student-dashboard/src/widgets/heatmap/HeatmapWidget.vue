@@ -8,7 +8,7 @@
 
     <div v-if="rows.length" class="heatmap">
       <div class="heatmap-row heatmap-head" :style="gridStyle">
-        <span>Факультет</span>
+        <span>Институт</span>
         <span v-for="semester in semesters" :key="semester">Сем. {{ semester }}</span>
       </div>
       <div v-for="faculty in rows" :key="faculty.id" class="heatmap-row" :style="gridStyle">

@@ -116,7 +116,7 @@ function enrichPerformanceRows(dataset) {
 
   return dataset.performance.map((item) => {
     const faculty = facultyById.get(item.facultyId)
-    const facultyName = faculty?.faculty || `Факультет ${item.facultyId}`
+    const facultyName = faculty?.faculty || `Институт ${item.facultyId}`
     const previous = dataset.performance.find(
       (entry) =>
         entry.facultyId === item.facultyId &&
@@ -245,7 +245,7 @@ function buildKpis(rows, facultySummaries, totalFaculties) {
       tone: 'cyan',
     },
     bestFaculty: {
-      title: 'Лучший факультет',
+      title: 'Лучший институт',
       value: bestFaculty?.shortName || '—',
       delta: bestFaculty ? `${formatDecimal(bestFaculty.averageScore)} балла` : 'нет данных',
       deltaTone: 'positive',
@@ -253,7 +253,7 @@ function buildKpis(rows, facultySummaries, totalFaculties) {
       tone: 'violet',
     },
     faculties: {
-      title: 'Факультетов',
+      title: 'Институтов',
       value: facultySummaries.length.toString(),
       delta: `из ${totalFaculties} доступных`,
       deltaTone: 'neutral',

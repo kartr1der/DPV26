@@ -26,11 +26,11 @@ const dataset = {
 }
 
 describe('dashboard builder model', () => {
-  it('creates three templates with fixed frame slots', () => {
-    assert.equal(dashboardTemplates.length, 3)
+  it('creates seven templates with fixed frame slots, including category-specific ones', () => {
+    assert.equal(dashboardTemplates.length, 7)
     assert.deepEqual(
       dashboardTemplates.map((template) => template.id),
-      ['overview', 'comparison', 'presentation'],
+      ['overview', 'comparison', 'presentation', 'education', 'science', 'finance', 'international'],
     )
     assert.ok(dashboardTemplates.every((template) => template.frames.length >= 4))
   })

@@ -2,11 +2,10 @@
   <section ref="canvas" class="dashboard-canvas" aria-label="Рабочая область дашборда">
     <div class="canvas-header">
       <div>
-        <p>{{ formattedDate }}</p>
-        <h2>Аналитика по факультетам и семестрам</h2>
+        <p>{{ formattedDate }} · {{ template.description }}</p>
+        <h2>{{ template.name }}</h2>
       </div>
       <div class="canvas-header-actions">
-        <span>{{ template.name }}</span>
         <div data-html2canvas-ignore="true">
           <slot name="actions"></slot>
         </div>
@@ -95,8 +94,11 @@ export default {
   margin: 0;
   color: var(--color-muted);
   font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 700;
+  text-transform: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .canvas-header h2 {
@@ -111,13 +113,6 @@ export default {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
-}
-
-.canvas-header-actions span {
-  color: #111827;
-  font-size: 14px;
-  font-weight: 900;
-  text-transform: uppercase;
 }
 
 .canvas-grid {

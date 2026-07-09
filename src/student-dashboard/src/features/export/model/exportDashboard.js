@@ -1,10 +1,10 @@
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
+import * as XLSX from 'xlsx'
 
 export function exportDashboardToExcel(detailRows) {
-  const XLSX = require('xlsx')
   const worksheet = XLSX.utils.aoa_to_sheet([
-    ['Факультет', 'Сокращение', 'Семестр', 'Средний балл', 'Студентов', 'Динамика (%)', 'Оценка'],
+    ['Институт', 'Сокращение', 'Семестр', 'Средний балл', 'Студентов', 'Динамика (%)', 'Оценка'],
     ...detailRows.map((row) => [
       row.facultyName,
       row.shortName,
@@ -29,6 +29,19 @@ export function exportDashboardToExcel(detailRows) {
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Динамика')
   XLSX.writeFile(workbook, `dashboard_faculties_${todayStamp()}.xlsx`)
+}
+
+export function exportCategoryToExcel(categoryLabel, rows) {
+  const worksheet = XLSX.utils.aoa_to_sheet([
+    ['Объект', 'Показатель', 'Категория', 'Период', 'Значение', 'Ед. изм.'],
+    ...rows.map((row) => [row.entity, row.metricLabel, row.categoryLabel, row.period, row.value, row.unit || '']),
+  ])
+
+  worksheet['!cols'] = [{ wch: 30 }, { wch: 26 }, { wch: 30 }, { wch: 10 }, { wch: 16 }, { wch: 10 }]
+
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, categoryLabel.slice(0, 31) || 'Показатели')
+  XLSX.writeFile(workbook, `dashboard_${slugify(categoryLabel)}_${todayStamp()}.xlsx`)
 }
 
 export async function exportDashboardToPdf(canvasElement) {
@@ -66,4 +79,11 @@ export async function exportDashboardToPdf(canvasElement) {
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10)
+}
+
+function slugify(text) {
+  return (text || 'metrics')
+    .toLowerCase()
+    .replace(/[^a-zа-я0-9]+/gi, '_')
+    .replace(/^_+|_+$/g, '')
 }

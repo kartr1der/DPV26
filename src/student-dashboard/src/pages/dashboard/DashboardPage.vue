@@ -7,7 +7,7 @@
           <div class="brand-mark">ТИУ</div>
           <div>
             <p class="brand-caption">Student Analytics</p>
-            <h1>Дашборд успеваемости</h1>
+            <h1>Дашборд показателей вуза</h1>
           </div>
         </div>        <!-- Блок пользователя (выход) -->        <div class="user-info-panel panel">
           <div class="user-avatar">
@@ -33,14 +33,28 @@
           <button class="edit-data-button" @click="openDataManager">
             <i class="bi bi-pencil-square"></i> Изменить данные
           </button>
-        </div>        <!-- Фильтры доступны всем -->
+          <button v-if="customStore.isUsingCustom" class="reset-data-button" @click="resetBuiltinDataset">
+            <i class="bi bi-arrow-counterclockwise"></i> Сбросить к встроенным данным
+          </button>
+        </div>        <!-- Фильтры: легаси-панель для встроенного датасета, либо адаптивная панель -->
+        <!-- под загруженный универсальный датасет показателей -->
 <FiltersSidebar
+v-if="!isGenericTemplate"
 :filters="draftFilters"
 :options="viewModel.filterOptions"
 :summary="sidebarSummary"
 @apply="applyFilters"
 @reset="resetFilters"
 @update-filter="updateDraftFilter"
+/>
+<CategoryFiltersSidebar
+v-else
+:category-label="categoryFilterOptions.categoryLabel"
+:entities="categoryFilterOptions.entities"
+:periods="categoryFilterOptions.periods"
+:records-count="categoryFilterOptions.entities.length ? categoryRecordsCount : 0"
+:filters="genericFilters"
+@update-filters="updateGenericFilters"
 />
         <!-- Инспектор фреймов (только для администратора) – после фильтров -->        <template v-if="userStore.isAdmin">
           <FrameInspector
@@ -68,13 +82,19 @@ ref="dashboardCanvas"
 
 <template #actions>
 <ExportActions
-:disabled="viewModel.empty"
-@excel="exportDashboardToExcel(viewModel.detailRows)"
+:disabled="isGenericTemplate ? !categoryDetailRows.length : viewModel.empty"
+@excel="handleExcelExport"
 @pdf="exportDashboardToPdf(canvasElement)"
 />
 </template>
 </DashboardCanvas>
-<DetailsTable :rows="viewModel.detailRows" :active-filter-label="activeFilterLabel" />
+<DetailsTable v-if="!isGenericTemplate" :rows="viewModel.detailRows" :active-filter-label="activeFilterLabel" />
+<CategoryDetailsTable
+v-else
+:rows="categoryDetailRows"
+:category-label="categoryFilterOptions.categoryLabel"
+:filter-label="genericFilterLabel"
+/>
     <!-- Модальное окно управления данными -->
 <DataManager
 v-if="showDataManager"
@@ -89,14 +109,17 @@ import { useRouter } from 'vue-router'
 import { getDashboardDataset } from '../../entities/dashboard/data/getDashboardDataset.js'
 import { useDashboardFilters } from '../../features/dashboard-filters/model/useDashboardFilters.js'
 import {
+  exportCategoryToExcel,
   exportDashboardToExcel,
   exportDashboardToPdf,
 } from '../../features/export/model/exportDashboard.js'
 import DashboardCanvas from '../../widgets/dashboard-canvas/DashboardCanvas.vue'
 import DashboardShell from '../../widgets/dashboard-shell/DashboardShell.vue'
 import DetailsTable from '../../widgets/details-table/DetailsTable.vue'
+import CategoryDetailsTable from '../../widgets/details-table/CategoryDetailsTable.vue'
 import ExportActions from '../../widgets/export-actions/ExportActions.vue'
 import FiltersSidebar from '../../widgets/filters-sidebar/FiltersSidebar.vue'
+import CategoryFiltersSidebar from '../../widgets/category-filters/CategoryFiltersSidebar.vue'
 import FrameInspector from '../../widgets/frame-inspector/FrameInspector.vue'
 import TemplateSelector from '../../widgets/template-selector/TemplateSelector.vue'
 import DataUploader from '../../components/DataUploader.vue'
@@ -107,13 +130,15 @@ import {
   createDefaultBuilderConfig,
   updateFrameConfig,
 } from './model/dashboardBuilderModel.js'
-import { dashboardTemplates } from './model/dashboardTemplates.js'
+import { dashboardTemplates, categoryTemplateMap } from './model/dashboardTemplates.js'
+import { getCategoryFilterOptions, getCategoryRecords } from './model/genericMetricsModel.js'
 import {
   buildDashboardViewModel,
   createDefaultDashboardFilters,
 } from './model/dashboardViewModel.js'
 import { useUserStore } from '@/stores/user'
 import { useCustomDataStore } from '@/stores/customData'
+import { useGenericMetricsStore } from '@/stores/genericMetrics'
 
 function getEffectiveDataset() {
   const customStore = useCustomDataStore()
@@ -152,8 +177,10 @@ export default {
     DashboardCanvas,
     DashboardShell,
     DetailsTable,
+    CategoryDetailsTable,
     ExportActions,
     FiltersSidebar,
+    CategoryFiltersSidebar,
     FrameInspector,
     TemplateSelector,
     DataUploader,
@@ -162,9 +189,11 @@ export default {
   setup() {
     const userStore = useUserStore()
     const customStore = useCustomDataStore()
+    const genericStore = useGenericMetricsStore()
     const router = useRouter()
 
     customStore.loadFromLocalStorage()
+    genericStore.loadFromLocalStorage()
 
     const currentDataset = ref(getEffectiveDataset())
 
@@ -172,16 +201,48 @@ export default {
     const { draftFilters, appliedFilters, applyFilters, resetFilters } =
       useDashboardFilters(defaultFilters)
     const builderConfig = reactive(createDefaultBuilderConfig())
+    const genericFilters = reactive({ entities: [], periods: [] })
     const dashboardCanvas = ref(null)
     const showDataManager = ref(false)
 
     const updateDraftFilter = (key, value) => {
       draftFilters[key] = value
     }
+    const updateGenericFilters = (patch) => {
+      Object.assign(genericFilters, patch)
+    }
+
+    const isGenericTemplate = computed(() =>
+      Object.values(categoryTemplateMap).includes(builderConfig.templateId),
+    )
+    const categoryFilterOptions = computed(() =>
+      getCategoryFilterOptions(genericStore.records, builderConfig.templateId),
+    )
+    const categoryRecordsCount = computed(
+      () => genericStore.records.filter((record) => record.category === builderConfig.templateId).length,
+    )
+    const categoryDetailRows = computed(() =>
+      getCategoryRecords(genericStore.records, builderConfig.templateId, genericFilters),
+    )
+    const genericFilterLabel = computed(() => {
+      const entitiesLabel = genericFilters.entities.length
+        ? `${genericFilters.entities.length} объект(ов)`
+        : 'все объекты'
+      const periodsLabel = genericFilters.periods.length
+        ? genericFilters.periods.join(', ')
+        : 'все периоды'
+      return `${entitiesLabel}, ${periodsLabel}`
+    })
 
     const viewModel = computed(() => buildDashboardViewModel(currentDataset.value, appliedFilters))
     const builderViewModel = computed(() =>
-      buildDashboardBuilderViewModel(currentDataset.value, appliedFilters, builderConfig),
+      buildDashboardBuilderViewModel(
+        currentDataset.value,
+        appliedFilters,
+        builderConfig,
+        genericStore.records,
+        genericFilters,
+      ),
     )
     const canvasElement = computed(() => dashboardCanvas.value?.$el || null)
     const sidebarSummary = computed(() => ({
@@ -198,6 +259,8 @@ export default {
 
     const selectTemplate = (templateId) => {
       Object.assign(builderConfig, createBuilderConfigForTemplate(templateId, builderConfig))
+      genericFilters.entities = []
+      genericFilters.periods = []
     }
     const selectFrame = (frameId) => {
       builderConfig.activeFrameId = frameId
@@ -226,12 +289,34 @@ export default {
       alert('Панель администратора в разработке. Здесь будет управление пользователями и системными настройками.')
     }
 
-    const reloadDataset = () => {
+    const resetBuiltinDataset = () => {
+      if (confirm('Сбросить загруженный датасет успеваемости и вернуться к встроенным данным?')) {
+        customStore.resetToBuiltin()
+      }
+    }
+
+    const handleExcelExport = () => {
+      if (isGenericTemplate.value) {
+        exportCategoryToExcel(categoryFilterOptions.value.categoryLabel, categoryDetailRows.value)
+      } else {
+        exportDashboardToExcel(viewModel.value.detailRows)
+      }
+    }
+
+    const reloadDataset = (uploadInfo) => {
       currentDataset.value = getEffectiveDataset()
       const newDefaultFilters = createDefaultDashboardFilters(currentDataset.value)
       Object.assign(draftFilters, newDefaultFilters)
       Object.assign(appliedFilters, newDefaultFilters)
       applyFilters()
+
+      const categories = uploadInfo?.categories || []
+      if (categories.length === 1) {
+        const templateId = categoryTemplateMap[categories[0]]
+        if (templateId && templateId !== builderConfig.templateId) {
+          selectTemplate(templateId)
+        }
+      }
     }
 
     watch(() => customStore.isUsingCustom, () => {
@@ -263,6 +348,16 @@ export default {
       openAdminPanel,
       showDataManager,
       reloadDataset,
+      genericFilters,
+      updateGenericFilters,
+      isGenericTemplate,
+      categoryFilterOptions,
+      categoryRecordsCount,
+      customStore,
+      resetBuiltinDataset,
+      categoryDetailRows,
+      genericFilterLabel,
+      handleExcelExport,
     }
   },
 }
@@ -377,6 +472,27 @@ export default {
 }
 .edit-data-button:hover {
   background: var(--color-surface);
+}
+
+.reset-data-button {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.reset-data-button:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .admin-button-wrapper {

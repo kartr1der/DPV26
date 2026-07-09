@@ -4,7 +4,7 @@
       <WidgetHeader
         icon="bi bi-bar-chart-fill"
         title="Средний балл и численность"
-        subtitle="Столбчатый график по факультетам"
+        subtitle="Столбчатый график по институтам"
       />
       <div class="chart-box">
         <BarChart :data="charts.bar" :options="cartesianOptions('score')" />
@@ -33,7 +33,7 @@
     </article>
 
     <article class="panel widget">
-      <WidgetHeader icon="bi bi-radar" title="Профиль факультетов" subtitle="Радар по метрикам" />
+      <WidgetHeader icon="bi bi-radar" title="Профиль институтов" subtitle="Радар по метрикам" />
       <div class="chart-box compact-chart">
         <RadarChart :data="charts.radar" :options="radarOptions" />
       </div>
